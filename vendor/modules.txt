@@ -1,0 +1,24 @@
+# github.com/angel-one/smartapigo v0.0.0-20221003090802-47cbce38ac5c
+## explicit; go 1.14
+github.com/angel-one/smartapigo
+# github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc
+## explicit
+github.com/boombuler/barcode
+github.com/boombuler/barcode/qr
+github.com/boombuler/barcode/utils
+# github.com/gocarina/gocsv v0.0.0-20180809181117-b8c38cb1ba36
+## explicit
+github.com/gocarina/gocsv
+# github.com/google/go-querystring v1.0.0
+## explicit
+github.com/google/go-querystring/query
+# github.com/pquerna/otp v1.4.0
+## explicit; go 1.12
+github.com/pquerna/otp
+github.com/pquerna/otp/hotp
+github.com/pquerna/otp/internal
+github.com/pquerna/otp/totp
+# github.com/zerodha/gokiteconnect/v4 v4.3.2
+## explicit; go 1.14
+github.com/zerodha/gokiteconnect/v4
+github.com/zerodha/gokiteconnect/v4/models
