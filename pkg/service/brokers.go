@@ -31,27 +31,26 @@ func (obj *serviceStruct) GetSupportedBrokers(c *gin.Context) {
 
 func (obj *serviceStruct) GetSpecificBrokerHoldings(c *gin.Context) {
 	var (
-		request GetSpecificBrokerHoldingsRequest
-		err     error
+		request  GetSpecificBrokerHoldingsRequest
+		response GetSpecificBrokerHoldingsResponse
+		err      error
 	)
 	if err := c.BindUri(&request); err != nil {
 		log.Println("bad request", err.Error())
-		c.JSON(http.StatusBadRequest, &gin.H{
-			"error": err.Error(),
-		})
+		response.Error = err.Error()
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
 	if request.Broker == "angelone" {
-		holdings, lastUpdated, _ := obj.dbObj.GetAngelOneHoldings()
+		holdings, lastUpdated, investedVal, _ := obj.dbObj.GetAngelOneHoldings()
 		if (len(holdings) != 0 && lastUpdated.YearDay() < time.Now().YearDay()) || len(holdings) == 0 {
 			//fetch data from angel api
 			holdings, err = external.GetHoldingsForAngel()
 			if err != nil {
 				log.Println("unable to fetch angel holdings", err.Error())
-				c.JSON(http.StatusFailedDependency, &gin.H{
-					"error": err.Error(),
-				})
+				response.Error = err.Error()
+				c.JSON(http.StatusFailedDependency, response)
 				return
 			}
 			//insert holdings in db
@@ -59,15 +58,16 @@ func (obj *serviceStruct) GetSpecificBrokerHoldings(c *gin.Context) {
 				log.Println("unable to update angel holdings", err.Error())
 			}
 		}
-		c.JSON(http.StatusOK, &gin.H{
-			"data": holdings,
-		})
+		response.Data = &GetSpecificBrokerHoldings{
+			InvestedValue: investedVal,
+			Holdings:      holdings,
+		}
+		c.JSON(http.StatusOK, response)
 		return
 	}
 
-	c.JSON(http.StatusBadRequest, &gin.H{
-		"error": "invalid broker received",
-	})
+	response.Error = "invalid broker received"
+	c.JSON(http.StatusBadRequest, response)
 }
 
 func (obj *serviceStruct) GetAllBrokerHoldings() []HoldingsInfo {

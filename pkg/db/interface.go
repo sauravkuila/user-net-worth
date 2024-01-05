@@ -21,7 +21,7 @@ type databaseStruct struct {
 type DatabaseInterface interface {
 	GetSupportedBrokers() ([]string, error)
 	// GetZerodhaHoldings() map[string]interface{}
-	GetAngelOneHoldings() ([]external.HoldingsInfo, time.Time, error)
+	GetAngelOneHoldings() ([]external.HoldingsInfo, time.Time, float64, error)
 	InsertAngelOneHoldings([]external.HoldingsInfo) error
 }
 

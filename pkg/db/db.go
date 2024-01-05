@@ -29,12 +29,15 @@ func (obj *databaseStruct) GetSupportedBrokers() ([]string, error) {
 	return brokers, nil
 }
 
-func (obj *databaseStruct) GetAngelOneHoldings() ([]external.HoldingsInfo, time.Time, error) {
-	var updateTime time.Time
+func (obj *databaseStruct) GetAngelOneHoldings() ([]external.HoldingsInfo, time.Time, float64, error) {
+	var (
+		updateTime    time.Time
+		investedValue float64 = 0
+	)
 	query := "select symbol, isin, quantity, price, updated_on from angel_one;"
 	rows, err := obj.psql.Query(query)
 	if err != nil {
-		return nil, time.Now().Add(-60 * 24 * 30 * time.Minute), err
+		return nil, time.Now().Add(-60 * 24 * 30 * time.Minute), investedValue, err
 	}
 	holdings := make([]external.HoldingsInfo, 0)
 	for rows.Next() {
@@ -47,7 +50,7 @@ func (obj *databaseStruct) GetAngelOneHoldings() ([]external.HoldingsInfo, time.
 		)
 		err := rows.Scan(&symbol, &isin, &quantity, &price, &updated)
 		if err != nil {
-			return nil, time.Now().Add(-60 * 24 * 30 * time.Minute), err
+			return nil, time.Now().Add(-60 * 24 * 30 * time.Minute), investedValue, err
 		}
 		holdings = append(holdings, external.HoldingsInfo{
 			Symbol:    symbol.String,
@@ -57,8 +60,9 @@ func (obj *databaseStruct) GetAngelOneHoldings() ([]external.HoldingsInfo, time.
 			UpdatedOn: updated.Time,
 		})
 		updateTime = updated.Time
+		investedValue += float64(quantity.Int64) * price.Float64
 	}
-	return holdings, updateTime, nil
+	return holdings, updateTime, investedValue, nil
 }
 
 func (obj *databaseStruct) InsertAngelOneHoldings(holdings []external.HoldingsInfo) error {
