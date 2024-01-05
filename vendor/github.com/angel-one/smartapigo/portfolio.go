@@ -5,21 +5,6 @@ import (
 )
 
 // Holding is an individual holdings response.
-// type Holding struct {
-// 	Tradingsymbol      string      `json:"tradingsymbol"`
-// 	Exchange           string      `json:"exchange"`
-// 	ISIN               string      `json:"isin"`
-// 	T1Quantity         string      `json:"t1quantity"`
-// 	RealisedQuantity   string      `json:"realisedquantity"`
-// 	Quantity           interface{} `json:"quantity"`
-// 	AuthorisedQuantity string      `json:"authorisedquantity"`
-// 	ProfitAndLoss      string      `json:"profitandloss"`
-// 	Product            string      `json:"product"`
-// 	CollateralQuantity string      `json:"collateralquantity"`
-// 	CollateralType     string      `json:"collateraltype"`
-// 	Haircut            string      `json:"haircut"`
-// }
-
 type Holding struct {
 	Tradingsymbol      string  `json:"tradingsymbol"`
 	Exchange           string  `json:"exchange"`
