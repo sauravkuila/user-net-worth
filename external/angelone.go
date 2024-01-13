@@ -3,6 +3,7 @@ package external
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math"
 	"time"
 
@@ -12,22 +13,19 @@ import (
 )
 
 var (
-	abClient    *SmartApi.Client = nil
-	userSession SmartApi.UserSession
+	abClient         *SmartApi.Client = nil
+	angelUserSession SmartApi.UserSession
 )
 
-func initiateConnection() error {
+func LoginAndSyncAngelOne(userId string, pin string, totpkey string, appKey string) error {
 	// Create New Angel Broking Client
-	// ABClient := SmartApi.New("S452329", "Angel@123", "QOna9C82")
-	abClient = SmartApi.New("S452329", "7648", "QOna9C82")
+	abClient = SmartApi.New(userId, pin, appKey)
 
-	fmt.Println("Client :- ", abClient)
-
-	totp := generatePassCode("DFVGOUJ4T2MW356CCP5ZR7RAGQ")
+	totp := generatePassCode(totpkey)
 
 	// User Login and Generate User Session
 	var err error
-	userSession, err = abClient.GenerateSession(totp)
+	angelUserSession, err = abClient.GenerateSession(totp)
 
 	if err != nil {
 		fmt.Println("error creating session. Error: ", err.Error())
@@ -35,7 +33,7 @@ func initiateConnection() error {
 	}
 
 	//Renew User Tokens using refresh token
-	userSession.UserSessionTokens, err = abClient.RenewAccessToken(userSession.RefreshToken)
+	angelUserSession.UserSessionTokens, err = abClient.RenewAccessToken(angelUserSession.RefreshToken)
 
 	if err != nil {
 		fmt.Println("error in renewing access token. Error: ", err.Error())
@@ -44,18 +42,18 @@ func initiateConnection() error {
 
 	// defer ABClient.Logout()
 
-	fmt.Println("User Session Tokens :- ", userSession.UserSessionTokens)
+	fmt.Println("User Session Tokens :- ", angelUserSession.UserSessionTokens)
 
 	//Get User Profile
-	userSession.UserProfile, err = abClient.GetUserProfile()
+	angelUserSession.UserProfile, err = abClient.GetUserProfile()
 
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
 	}
 
-	fmt.Println("User Profile :- ", userSession.UserProfile)
-	fmt.Println("User Session Object :- ", userSession)
+	fmt.Println("User Profile :- ", angelUserSession.UserProfile)
+	fmt.Println("User Session Object :- ", angelUserSession)
 
 	return nil
 }
@@ -125,7 +123,9 @@ func GetMarginAngel() {
 
 func GetHoldingsForAngel() ([]HoldingsInfo, error) {
 	if abClient == nil {
-		initiateConnection()
+		log.Println("missing client object")
+		return nil, fmt.Errorf("please sync broker to initiate holdings")
+		// LoginAndSyncAngelOne("", "", "", "")
 	}
 
 	if abClient != nil {
