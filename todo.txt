@@ -1,0 +1,22 @@
+- integrate broker logins (done)
+- sources
+   - brokers (done)
+   - mf central (done)
+   - upi for bank accounts
+   - pf
+   - us stocks (vested, ind money)
+   - property
+- tasks
+   - keep track of portfolio sync
+   - allow portfolio sync of any user anytime
+   - keep holdings in db and always fetch from db
+   - flush db and update new holdings on each sync
+   - get individual broker portfolio
+   - get total portfolio
+   - integrate mf central api for mutual funds
+   - connect with upi balance check for account value
+   - connect for pf value api 
+- flow
+   - sync holdings by connecting to individual brokers
+   - sync mf by connecting to mf central
+   - fetch consolidated portfolio data
