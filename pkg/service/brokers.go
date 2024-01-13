@@ -26,7 +26,6 @@ func (obj *serviceStruct) GetSupportedBrokers(c *gin.Context) {
 	c.JSON(http.StatusOK, &gin.H{
 		"data": brokers,
 	})
-	return
 }
 
 func (obj *serviceStruct) GetSpecificBrokerHoldings(c *gin.Context) {

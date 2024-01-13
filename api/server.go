@@ -25,6 +25,7 @@ func StartServer() error {
 		return err
 	}
 
+	//set up service interface
 	serviceObj := service.InitService(dbObj)
 
 	serverObj = &http.Server{

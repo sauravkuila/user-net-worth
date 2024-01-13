@@ -1,5 +1,9 @@
-drop table if exists angel_one;
 drop table if exists supported_broker;
+drop table if exists angel_one;
+drop table if exists zerodha;
+drop table if exists idirect;
+drop table if exists mf_central;
+drop table if exists creds;
 
 create table angel_one(
     id serial primary key,
@@ -59,7 +63,18 @@ create table broker_sync(
     foreign key (broker_id) references supported_broker(id)
 );
 
-create table holdings_updated
+create table mf_central(
+    id serial primary key,
+    folio text not null,
+    scheme_name text not null,
+    isin text not null,
+    quantity float not null,
+    price float not null,
+    cost_price float,
+    curr_price float,
+    created_on timestamp default now(),
+    updated_on timestamp default now()
+);
 
 -- create function
 CREATE  FUNCTION update_record()
@@ -89,6 +104,13 @@ CREATE TRIGGER sync_update_record
     BEFORE UPDATE
     ON
         zerodha
+    FOR EACH ROW
+EXECUTE PROCEDURE update_record();
+
+CREATE TRIGGER sync_update_record
+    BEFORE UPDATE
+    ON
+        mf_central
     FOR EACH ROW
 EXECUTE PROCEDURE update_record();
 

@@ -5,9 +5,10 @@ go 1.20
 require (
 	github.com/angel-one/smartapigo v0.0.0-20221003090802-47cbce38ac5c
 	github.com/gin-gonic/gin v1.9.1
+	github.com/go-resty/resty/v2 v2.11.0
+	github.com/google/uuid v1.5.0
 	github.com/lib/pq v1.10.9
 	github.com/pquerna/otp v1.4.0
-	github.com/zerodha/gokiteconnect/v4 v4.3.2
 )
 
 require (
@@ -20,10 +21,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.16.0 // indirect
-	github.com/go-resty/resty/v2 v2.11.0 // indirect
-	github.com/gocarina/gocsv v0.0.0-20180809181117-b8c38cb1ba36 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
-	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect

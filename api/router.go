@@ -16,6 +16,8 @@ func getRouter(serviceObj service.ServiceInterface) *gin.Engine {
 	router.POST("/brokers/sync", serviceObj.UpdateBrokerCred)
 	router.GET("/holding/sync/:broker", serviceObj.UpdateHoldingsFromBroker)
 	router.GET("/holding/:broker", serviceObj.GetSpecificBrokerHoldings)
+	router.GET("/holding/mf", serviceObj.GetMutualFundsHoldings)
+	router.GET("/holding/mf/sync", serviceObj.UpdateMfHoldingsFromMfCentral)
 	router.GET("/worth", serviceObj.GetTotalWorth)
 
 	callbackGroup := router.Group("/callback")

@@ -18,8 +18,6 @@ func main() {
 	if err := api.StartServer(); err != nil {
 		log.Fatal("failed to start portfolio-worth server", err.Error())
 	}
-	// api.ReachAngel()
-	// api.ReachZerodha()
 
 	// Wait for interrupt signal to gracefully shutdown the server with a timeouts
 	quit := make(chan os.Signal)

@@ -24,9 +24,11 @@ type DatabaseInterface interface {
 	GetAngelOneHoldings() ([]external.HoldingsInfo, float64, error)
 	GetIDirectHoldings() ([]external.HoldingsInfo, float64, error)
 	GetZerodhaHoldings() ([]external.HoldingsInfo, float64, error)
+	GetMfCentralHoldings() ([]external.MfHoldingsInfo, float64, error)
 	InsertAngelOneHoldings([]external.HoldingsInfo) error
 	InsertIDirectHoldings([]external.HoldingsInfo) error
 	InsertZerodhaHoldings([]external.HoldingsInfo) error
+	InsertMfCentralHoldings([]external.MfHoldingsInfo) error
 }
 
 const (

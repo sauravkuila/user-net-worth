@@ -350,6 +350,7 @@ func prepareRequest(body map[string]interface{}) (string, string, string) {
 	return timeStamp, string(checksumHex), string(payload)
 }
 
+//for checksum generation
 // import json
 // from datetime import datetime
 // import hashlib

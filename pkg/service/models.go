@@ -22,6 +22,17 @@ type GetSpecificBrokerHoldings struct {
 	Holdings      interface{} `json:"holdings,omitempty"`
 }
 
+type GetMutualFundsHoldingsResponse struct {
+	Data  *GetMutualFundsHoldings `json:"data"`
+	Error string                  `json:"error"`
+}
+
+type GetMutualFundsHoldings struct {
+	InvestedValue float64     `json:"investedValue,omitempty"`
+	CurrentValue  float64     `json:"currentValue,omitempty"`
+	Holdings      interface{} `json:"holdings,omitempty"`
+}
+
 type GetIdirectSessionKeyRequest struct {
 	ApiSession int64 `form:"apisession" binding:"required"`
 }
@@ -43,6 +54,7 @@ type GetTotalWorthResponse struct {
 type GetTotalWorth struct {
 	TotalInvested float64                     `json:"totalInvested,omitempty"`
 	Stocks        []GetSpecificBrokerHoldings `json:"stocks,omitempty"`
+	MutualFunds   *GetMutualFundsHoldings     `json:"mutualfunds,omitempty"`
 }
 
 type UpdateBrokerCredRequest struct {

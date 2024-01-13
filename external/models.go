@@ -10,6 +10,17 @@ type HoldingsInfo struct {
 	UpdatedOn time.Time
 }
 
+type MfHoldingsInfo struct {
+	Name        string
+	Quantity    float64
+	Isin        string
+	AvgPrice    float64
+	InvestedVal float64
+	CurrentVal  float64
+	Folio       string
+	UpdatedOn   time.Time
+}
+
 type IDirectCustomerDetailRequest struct {
 	SessionToken string
 	AppKey       string
@@ -134,5 +145,85 @@ type ZerodhaLoginResponse struct {
 		} `json:"profile"`
 	} `json:"data"`
 	Message   string `json:"message"`
-	ErrorType string `json:""error_type`
+	ErrorType string `json:"error_type"`
+}
+
+type MFCentralPortfolioRequest struct {
+	Email  string `json:"email"`
+	Mobile string `json:"mobile"`
+	Pan    string `json:"pan"`
+	Pekrn  string `json:"pekrn"`
+}
+
+type MfCentralPortfolioResponse struct {
+	Data []struct {
+		Summary []struct {
+			Amc                string      `json:"amc"`
+			AmcName            string      `json:"amcName"`
+			CurrentMktValue    interface{} `json:"currentMktValue"`
+			CostValue          interface{} `json:"costValue"`
+			GainLoss           interface{} `json:"gainLoss"`
+			GainLossPercentage interface{} `json:"gainLossPercentage"`
+			IsDemat            string      `json:"isDemat"`
+		} `json:"summary"`
+		Schemes []struct {
+			Amc                string      `json:"amc"`
+			AmcName            string      `json:"amcName"`
+			Folio              string      `json:"folio"`
+			InvestorName       string      `json:"investorName"`
+			Age                interface{} `json:"age"`
+			Mobile             string      `json:"mobile"`
+			Email              string      `json:"email"`
+			TaxStatus          string      `json:"taxStatus"`
+			ModeOfHolding      string      `json:"modeOfHolding"`
+			TransactionSource  string      `json:"transactionSource"`
+			SchemeCode         string      `json:"schemeCode"`
+			SchemeName         string      `json:"schemeName"`
+			SchemeOption       string      `json:"schemeOption"`
+			IdcwChangeAllowed  string      `json:"idcwChangeAllowed"`
+			AssetType          string      `json:"assetType"`
+			SchemeType         string      `json:"schemeType"`
+			Nav                interface{} `json:"nav"`
+			NavDate            interface{} `json:"navDate"`
+			ClosingBalance     interface{} `json:"closingBalance"`
+			AvailableUnits     interface{} `json:"availableUnits"`
+			AvailableAmount    interface{} `json:"availableAmount"`
+			CurrentMktValue    interface{} `json:"currentMktValue"`
+			CostValue          interface{} `json:"costValue"`
+			GainLoss           interface{} `json:"gainLoss"`
+			GainLossPercentage interface{} `json:"gainLossPercentage"`
+			LienUnitsFlag      string      `json:"lienUnitsFlag"`
+			Isin               string      `json:"isin"`
+			BrokerCode         string      `json:"brokerCode"`
+			BrokerName         string      `json:"brokerName"`
+			DecimalUnits       int         `json:"decimalUnits"`
+			DecimalAmount      int         `json:"decimalAmount"`
+			DecimalNav         int         `json:"decimalNav"`
+			IsDemat            string      `json:"isDemat"`
+			// Bank               struct {
+			// 	AccountNo   string `json:"accountNo"`
+			// 	AccountType string `json:"accountType"`
+			// 	Name        string `json:"name"`
+			// 	Ifsc        string `json:"ifsc"`
+			// 	Branch      string `json:"branch"`
+			// 	City        string `json:"city"`
+			// 	Pincode     string `json:"pincode"`
+			// 	Micr        string `json:"micr"`
+			// 	NeftIfsc    string `json:"neftIfsc"`
+			// } `json:"bank"`
+			Bank interface{} `json:"bank"`
+		} `json:"schemes"`
+	} `json:"data"`
+	Mobile    string `json:"mobile"`
+	Pekrn     string `json:"pekrn"`
+	Pan       string `json:"pan"`
+	Email     string `json:"email"`
+	ReqID     string `json:"reqId"`
+	Portfolio []struct {
+		CurrentMktValue    interface{} `json:"currentMktValue"`
+		CostValue          interface{} `json:"costValue"`
+		GainLoss           interface{} `json:"gainLoss"`
+		GainLossPercentage interface{} `json:"gainLossPercentage"`
+		IsDemat            string      `json:"isDemat"`
+	} `json:"portfolio"`
 }
