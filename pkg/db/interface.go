@@ -19,7 +19,8 @@ type databaseStruct struct {
 
 type DatabaseInterface interface {
 	GetSupportedBrokers() ([]string, error)
-	GetBrokerCred() (map[string]interface{}, error)
+	GetBrokerCred(broker string) (map[string]interface{}, error)
+	UpdateBrokerCred(data map[string]interface{}) error
 	GetAngelOneHoldings() ([]external.HoldingsInfo, float64, error)
 	GetIDirectHoldings() ([]external.HoldingsInfo, float64, error)
 	GetZerodhaHoldings() ([]external.HoldingsInfo, float64, error)

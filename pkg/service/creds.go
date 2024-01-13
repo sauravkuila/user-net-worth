@@ -13,7 +13,7 @@ func (obj *serviceStruct) UpdateBrokerCred(c *gin.Context) {
 		request  UpdateBrokerCredRequest
 		response UpdateBrokerCredResponse
 	)
-	if err := c.BindUri(&request); err != nil {
+	if err := c.BindJSON(&request); err != nil {
 		log.Println("bad request", err.Error())
 		response.Error = err.Error()
 		c.JSON(http.StatusBadRequest, response)
@@ -21,11 +21,24 @@ func (obj *serviceStruct) UpdateBrokerCred(c *gin.Context) {
 	}
 
 	if request.Broker == "angelone" {
-		response.Error = "implementation pending"
-		c.JSON(http.StatusBadRequest, response)
-		return
+		data, err := obj.dbObj.GetBrokerCred("angelone")
+		if err != nil {
+			log.Println("error fetching cred in db.", err.Error())
+			log.Println("error in sync: ", err)
+			response.Error = err.Error()
+			c.JSON(http.StatusInternalServerError, response)
+			return
+		}
+		err = external.LoginAndSyncAngelOne(data["user_key"].(string), data["pass_key"].(string), data["totp_secret"].(string), data["app_api_key"].(string))
+		if err != nil {
+			log.Println("error in sync: ", err)
+			response.Error = err.Error()
+			c.JSON(http.StatusInternalServerError, response)
+			return
+		}
+		response.Data = "update successful"
 	} else if request.Broker == "zerodha" {
-		data, err := obj.dbObj.GetBrokerCred()
+		data, err := obj.dbObj.GetBrokerCred("zerodha")
 		if err != nil {
 			log.Println("error fetching cred in db.", err.Error())
 			log.Println("error in sync: ", err)

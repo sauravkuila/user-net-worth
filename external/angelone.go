@@ -125,7 +125,6 @@ func GetHoldingsForAngel() ([]HoldingsInfo, error) {
 	if abClient == nil {
 		log.Println("missing client object")
 		return nil, fmt.Errorf("please sync broker to initiate holdings")
-		// LoginAndSyncAngelOne("", "", "", "")
 	}
 
 	if abClient != nil {
