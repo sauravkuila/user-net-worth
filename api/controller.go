@@ -8,7 +8,6 @@ import (
 
 func ReachZerodha() {
 	fmt.Println("call to zerodha from here")
-	external.GetMargin()
 }
 
 func ReachAngel() {

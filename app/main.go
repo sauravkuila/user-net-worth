@@ -10,15 +10,11 @@ import (
 	"syscall"
 	"time"
 
-	// "github.com/pquerna/otp"
-	// "github.com/pquerna/otp/totp"
 	"github.com/sauravkuila/portfolio-worth/api"
 )
 
 func main() {
 	log.Println("Portfolio Valuation Project")
-	// totp := generatePassCode("DFVGOUJ4T2MW356CCP5ZR7RAGQ")
-	// fmt.Println(totp)
 	if err := api.StartServer(); err != nil {
 		log.Fatal("failed to start portfolio-worth server", err.Error())
 	}

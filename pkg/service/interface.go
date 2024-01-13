@@ -11,8 +11,14 @@ type serviceStruct struct {
 
 type ServiceInterface interface {
 	GetSupportedBrokers(c *gin.Context)
+	UpdateBrokerCred(c *gin.Context)
+
+	UpdateHoldingsFromBroker(c *gin.Context)
 	GetSpecificBrokerHoldings(c *gin.Context)
 	GetAllBrokerHoldings() []HoldingsInfo
+
+	GetIdirectApiSessionKey(c *gin.Context)
+	GetTotalWorth(c *gin.Context)
 }
 
 func InitService(dbItf db.DatabaseInterface) ServiceInterface {

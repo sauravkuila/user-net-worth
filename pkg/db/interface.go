@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/sauravkuila/portfolio-worth/external"
@@ -20,9 +19,13 @@ type databaseStruct struct {
 
 type DatabaseInterface interface {
 	GetSupportedBrokers() ([]string, error)
-	// GetZerodhaHoldings() map[string]interface{}
-	GetAngelOneHoldings() ([]external.HoldingsInfo, time.Time, float64, error)
+	GetBrokerCred() (map[string]interface{}, error)
+	GetAngelOneHoldings() ([]external.HoldingsInfo, float64, error)
+	GetIDirectHoldings() ([]external.HoldingsInfo, float64, error)
+	GetZerodhaHoldings() ([]external.HoldingsInfo, float64, error)
 	InsertAngelOneHoldings([]external.HoldingsInfo) error
+	InsertIDirectHoldings([]external.HoldingsInfo) error
+	InsertZerodhaHoldings([]external.HoldingsInfo) error
 }
 
 const (

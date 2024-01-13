@@ -7,16 +7,59 @@ create table angel_one(
     isin text not null,
     quantity int not null,
     price float not null,
-    created_on date default now(),
-    updated_on date default now()
+    created_on timestamp default now(),
+    updated_on timestamp default now()
+);
+
+create table idirect(
+    id serial primary key,
+    symbol text not null,
+    isin text not null,
+    quantity int not null,
+    price float not null,
+    created_on timestamp default now(),
+    updated_on timestamp default now()
+);
+
+create table zerodha(
+    id serial primary key,
+    symbol text not null,
+    isin text not null,
+    quantity int not null,
+    price float not null,
+    created_on timestamp default now(),
+    updated_on timestamp default now()
 );
 
 create table supported_broker(
     id serial primary key,
     broker_name text not null,
-    created_on date default now(),
-    updated_on date default now()
+    created_on timestamp default now(),
+    updated_on timestamp default now()
 );
+
+create table creds(
+    id serial primary key,
+    account text not null,
+    totp_secret text,
+    user_key text,
+    pass_key text,
+    app_api_key text,
+    secret_key text,
+    created_on timestamp default now(),
+    updated_on timestamp default now()
+)
+
+create table broker_sync(
+    id serial primary key,
+    broker_id int not null,
+    holdings_sync bool not null default FALSE,
+    created_on timestamp default now(),
+    updated_on timestamp default now(),
+    foreign key (broker_id) references supported_broker(id)
+);
+
+create table holdings_updated
 
 -- create function
 CREATE  FUNCTION update_record()
@@ -39,6 +82,13 @@ CREATE TRIGGER sync_update_record
     BEFORE UPDATE
     ON
         angel_one
+    FOR EACH ROW
+EXECUTE PROCEDURE update_record();
+
+CREATE TRIGGER sync_update_record
+    BEFORE UPDATE
+    ON
+        zerodha
     FOR EACH ROW
 EXECUTE PROCEDURE update_record();
 

@@ -13,7 +13,16 @@ func getRouter(serviceObj service.ServiceInterface) *gin.Engine {
 		c.String(http.StatusOK, "I am Healthy")
 	})
 	router.GET("/brokers", serviceObj.GetSupportedBrokers)
+	router.POST("/brokers/sync/:broker", serviceObj.UpdateBrokerCred)
+	router.GET("/holding/sync/:broker", serviceObj.UpdateHoldingsFromBroker)
 	router.GET("/holding/:broker", serviceObj.GetSpecificBrokerHoldings)
+	router.GET("/worth", serviceObj.GetTotalWorth)
+
+	callbackGroup := router.Group("/callback")
+	{
+		callbackGroup.GET("/idirect", serviceObj.GetIdirectApiSessionKey)
+		callbackGroup.POST("/idirect", serviceObj.GetIdirectApiSessionKey) //using this
+	}
 
 	return router
 }
