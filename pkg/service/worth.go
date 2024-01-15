@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sauravkuila/portfolio-worth/external"
+	"github.com/sauravkuila/portfolio-worth/pkg/service/broker"
+	"github.com/sauravkuila/portfolio-worth/pkg/service/mutualfund"
 	"github.com/sauravkuila/portfolio-worth/pkg/utils"
 )
 
@@ -15,50 +17,19 @@ func (obj *serviceStruct) GetTotalWorth(c *gin.Context) {
 	)
 
 	response.Data = &GetTotalWorth{
-		Stocks: make([]GetSpecificBrokerHoldings, 0),
+		Stocks: make([]broker.GetSpecificBrokerHoldings, 0),
 	}
-
-	holdings, investedVal, err := obj.dbObj.GetAngelOneHoldings()
+	//broker holdings
+	brokerHoldings, err := obj.brokerObj.GetAllBrokerHoldings()
 	if err != nil {
-		log.Println("failed to fetch holdings from db", err.Error())
-		response.Error = err.Error()
-		c.JSON(http.StatusInternalServerError, response)
+		log.Println("error fetching holdings", err.Error())
+		c.JSON(http.StatusFailedDependency, response)
 		return
 	}
-	response.Data.TotalInvested += investedVal
-	response.Data.Stocks = append(response.Data.Stocks, GetSpecificBrokerHoldings{
-		BrokerName:    "AngelOne",
-		InvestedValue: investedVal,
-		Holdings:      holdings,
-	})
-
-	holdings, investedVal, err = obj.dbObj.GetZerodhaHoldings()
-	if err != nil {
-		log.Println("failed to fetch holdings from db", err.Error())
-		response.Error = err.Error()
-		c.JSON(http.StatusInternalServerError, response)
-		return
+	for _, v := range brokerHoldings {
+		response.Data.Stocks = append(response.Data.Stocks, v)
+		response.Data.TotalInvested += v.InvestedValue
 	}
-	response.Data.TotalInvested += investedVal
-	response.Data.Stocks = append(response.Data.Stocks, GetSpecificBrokerHoldings{
-		BrokerName:    "Zerodha",
-		InvestedValue: investedVal,
-		Holdings:      holdings,
-	})
-
-	holdings, investedVal, err = obj.dbObj.GetIDirectHoldings()
-	if err != nil {
-		log.Println("failed to fetch holdings from db", err.Error())
-		response.Error = err.Error()
-		c.JSON(http.StatusInternalServerError, response)
-		return
-	}
-	response.Data.TotalInvested += investedVal
-	response.Data.Stocks = append(response.Data.Stocks, GetSpecificBrokerHoldings{
-		BrokerName:    "IDirect",
-		InvestedValue: investedVal,
-		Holdings:      holdings,
-	})
 
 	//mutual funds
 	{
@@ -70,7 +41,7 @@ func (obj *serviceStruct) GetTotalWorth(c *gin.Context) {
 			return
 		}
 		response.Data.TotalInvested += mfInvestedVal
-		response.Data.MutualFunds = &GetMutualFundsHoldings{
+		response.Data.MutualFunds = &mutualfund.GetMutualFundsHoldings{
 			InvestedValue: mfInvestedVal,
 			// Holdings:      mfholdings,
 		}

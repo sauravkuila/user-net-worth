@@ -1,4 +1,4 @@
-package service
+package broker
 
 import (
 	"fmt"
@@ -9,87 +9,12 @@ import (
 	"github.com/sauravkuila/portfolio-worth/external"
 )
 
-func (obj *serviceStruct) GetSupportedBrokers(c *gin.Context) {
-	//get supported brokers from db
-	// brokers := []string{"AngelOne", "Zerodha", "ICICIDirect"}
-	var brokers []string
-
-	brokers, err := obj.dbObj.GetSupportedBrokers()
-	if err != nil {
-		log.Println("unable to fetch supported brokers", err.Error())
-		c.JSON(http.StatusInternalServerError, &gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, &gin.H{
-		"data": brokers,
-	})
-}
-
-func (obj *serviceStruct) GetSpecificBrokerHoldings(c *gin.Context) {
-	var (
-		request  GetSpecificBrokerHoldingsRequest
-		response GetSpecificBrokerHoldingsResponse
-	)
-	if err := c.BindUri(&request); err != nil {
-		log.Println("bad request", err.Error())
-		response.Error = err.Error()
-		c.JSON(http.StatusBadRequest, response)
-		return
-	}
-
-	if request.Broker == "angelone" {
-		holdings, investedVal, err := obj.dbObj.GetAngelOneHoldings()
-		if err != nil {
-			log.Println("failed to fetch holdings from db", err.Error())
-			response.Error = err.Error()
-			c.JSON(http.StatusInternalServerError, response)
-			return
-		}
-		response.Data = &GetSpecificBrokerHoldings{
-			InvestedValue: investedVal,
-			Holdings:      holdings,
-		}
-	} else if request.Broker == "zerodha" {
-		holdings, investedVal, err := obj.dbObj.GetZerodhaHoldings()
-		if err != nil {
-			log.Println("failed to fetch holdings from db", err.Error())
-			response.Error = err.Error()
-			c.JSON(http.StatusInternalServerError, response)
-			return
-		}
-		response.Data = &GetSpecificBrokerHoldings{
-			InvestedValue: investedVal,
-			Holdings:      holdings,
-		}
-	} else if request.Broker == "idirect" {
-		holdings, investedVal, err := obj.dbObj.GetIDirectHoldings()
-		if err != nil {
-			log.Println("failed to fetch holdings from db", err.Error())
-			response.Error = err.Error()
-			c.JSON(http.StatusInternalServerError, response)
-			return
-		}
-		response.Data = &GetSpecificBrokerHoldings{
-			InvestedValue: investedVal,
-			Holdings:      holdings,
-		}
-	} else {
-		response.Error = "invalid broker received"
-		c.JSON(http.StatusBadRequest, response)
-		return
-	}
-
-	c.JSON(http.StatusOK, response)
-}
-
-func (obj *serviceStruct) UpdateHoldingsFromBroker(c *gin.Context) {
+func (obj *brokerSt) UpdateHoldingsFromBroker(c *gin.Context) {
 	var (
 		request  UpdateHoldingsFromBrokerRequest
 		response UpdateHoldingsFromBrokerResponse
 	)
+
 	if err := c.BindUri(&request); err != nil {
 		log.Println("bad request", err.Error())
 		response.Error = err.Error()
@@ -160,24 +85,73 @@ func (obj *serviceStruct) UpdateHoldingsFromBroker(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (obj *serviceStruct) GetAllBrokerHoldings() []HoldingsInfo {
-	return nil
-}
-
-func (obj *serviceStruct) GetIdirectApiSessionKey(c *gin.Context) {
+func (obj *brokerSt) GetSpecificBrokerHoldings(c *gin.Context) {
 	var (
-		request GetIdirectSessionKeyRequest
+		request  GetSpecificBrokerHoldingsRequest
+		response GetSpecificBrokerHoldingsResponse
 	)
-
-	if err := c.BindQuery(&request); err != nil {
-		log.Println("request params unavailable", err.Error(), c.Request.Header)
-		c.JSON(http.StatusBadRequest, &gin.H{
-			"error": err.Error(),
-		})
+	log.Println("inside broker package")
+	if err := c.BindUri(&request); err != nil {
+		log.Println("bad request", err.Error())
+		response.Error = err.Error()
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	c.JSON(http.StatusOK, &gin.H{
-		"data": request.ApiSession,
-	})
+	holdings, investedVal, err := obj.getHoldingsByBroker(request.Broker)
+	if err != nil {
+		log.Println("failed to fetch holdings from db", err.Error())
+		response.Error = err.Error()
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	response.Data = &GetSpecificBrokerHoldings{
+		BrokerName:    request.Broker,
+		Holdings:      holdings,
+		InvestedValue: investedVal,
+	}
+
+	// if request.Broker == "angelone" {
+	// 	holdings, investedVal, err := obj.dbObj.GetAngelOneHoldings()
+	// 	if err != nil {
+	// 		log.Println("failed to fetch holdings from db", err.Error())
+	// 		response.Error = err.Error()
+	// 		c.JSON(http.StatusInternalServerError, response)
+	// 		return
+	// 	}
+	// 	response.Data = &GetSpecificBrokerHoldings{
+	// 		InvestedValue: investedVal,
+	// 		Holdings:      holdings,
+	// 	}
+	// } else if request.Broker == "zerodha" {
+	// 	holdings, investedVal, err := obj.dbObj.GetZerodhaHoldings()
+	// 	if err != nil {
+	// 		log.Println("failed to fetch holdings from db", err.Error())
+	// 		response.Error = err.Error()
+	// 		c.JSON(http.StatusInternalServerError, response)
+	// 		return
+	// 	}
+	// 	response.Data = &GetSpecificBrokerHoldings{
+	// 		InvestedValue: investedVal,
+	// 		Holdings:      holdings,
+	// 	}
+	// } else if request.Broker == "idirect" {
+	// 	holdings, investedVal, err := obj.dbObj.GetIDirectHoldings()
+	// 	if err != nil {
+	// 		log.Println("failed to fetch holdings from db", err.Error())
+	// 		response.Error = err.Error()
+	// 		c.JSON(http.StatusInternalServerError, response)
+	// 		return
+	// 	}
+	// 	response.Data = &GetSpecificBrokerHoldings{
+	// 		InvestedValue: investedVal,
+	// 		Holdings:      holdings,
+	// 	}
+	// } else {
+	// 	response.Error = "invalid broker received"
+	// 	c.JSON(http.StatusBadRequest, response)
+	// 	return
+	// }
+
+	c.JSON(http.StatusOK, response)
 }

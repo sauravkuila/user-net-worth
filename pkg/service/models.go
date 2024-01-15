@@ -1,50 +1,9 @@
 package service
 
-type HoldingsInfo struct {
-	Symbol   string
-	Quantity int64
-	Isin     string
-	AvgPrice float64
-}
-
-type GetSpecificBrokerHoldingsRequest struct {
-	Broker string `uri:"broker" binding:"required"`
-}
-
-type GetSpecificBrokerHoldingsResponse struct {
-	Data  *GetSpecificBrokerHoldings `json:"data,omitempty"`
-	Error string                     `json:"error,omitempty"`
-}
-
-type GetSpecificBrokerHoldings struct {
-	BrokerName    string      `json:"broker,omitempty"`
-	InvestedValue float64     `json:"investedValue,omitempty"`
-	Holdings      interface{} `json:"holdings,omitempty"`
-}
-
-type GetMutualFundsHoldingsResponse struct {
-	Data  *GetMutualFundsHoldings `json:"data"`
-	Error string                  `json:"error"`
-}
-
-type GetMutualFundsHoldings struct {
-	InvestedValue float64     `json:"investedValue,omitempty"`
-	CurrentValue  float64     `json:"currentValue,omitempty"`
-	Holdings      interface{} `json:"holdings,omitempty"`
-}
-
-type GetIdirectSessionKeyRequest struct {
-	ApiSession int64 `form:"apisession" binding:"required"`
-}
-
-type UpdateHoldingsFromBrokerRequest struct {
-	Broker string `uri:"broker" binding:"required"`
-}
-
-type UpdateHoldingsFromBrokerResponse struct {
-	Data  interface{} `json:"data,omitempty"`
-	Error string      `json:"error,omitempty"`
-}
+import (
+	"github.com/sauravkuila/portfolio-worth/pkg/service/broker"
+	"github.com/sauravkuila/portfolio-worth/pkg/service/mutualfund"
+)
 
 type GetTotalWorthResponse struct {
 	Data  *GetTotalWorth `json:"data,omitempty"`
@@ -52,21 +11,7 @@ type GetTotalWorthResponse struct {
 }
 
 type GetTotalWorth struct {
-	TotalInvested float64                     `json:"totalInvested,omitempty"`
-	Stocks        []GetSpecificBrokerHoldings `json:"stocks,omitempty"`
-	MutualFunds   *GetMutualFundsHoldings     `json:"mutualfunds,omitempty"`
-}
-
-type UpdateBrokerCredRequest struct {
-	Broker     string `uri:"broker" binding:"required"`
-	TOTPSecret string `json:"totp_secret"`
-	UserKey    string `json:"user_key"`
-	PassKey    string `json:"pass_key"`
-	AppCode    string `json:"app_code"`
-	SecretKey  string `json:"secret_key"`
-}
-
-type UpdateBrokerCredResponse struct {
-	Data  interface{} `json:"data,omitempty"`
-	Error string      `json:"error,omitempty"`
+	TotalInvested float64                            `json:"totalInvested,omitempty"`
+	Stocks        []broker.GetSpecificBrokerHoldings `json:"stocks,omitempty"`
+	MutualFunds   *mutualfund.GetMutualFundsHoldings `json:"mutualfunds,omitempty"`
 }

@@ -1,4 +1,4 @@
-package service
+package mutualfund
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/sauravkuila/portfolio-worth/pkg/utils"
 )
 
-func (obj *serviceStruct) GetMutualFundsHoldings(c *gin.Context) {
+func (obj *mutualfundSt) GetMutualFundsHoldings(c *gin.Context) {
 	var (
 		response GetMutualFundsHoldingsResponse
 	)
@@ -40,7 +40,7 @@ func (obj *serviceStruct) GetMutualFundsHoldings(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (obj *serviceStruct) UpdateMfHoldingsFromMfCentral(c *gin.Context) {
+func (obj *mutualfundSt) UpdateMfHoldingsFromMfCentral(c *gin.Context) {
 	var (
 		response UpdateHoldingsFromBrokerResponse
 	)
