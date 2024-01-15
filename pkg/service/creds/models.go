@@ -1,7 +1,7 @@
 package creds
 
 type UpdateBrokerCredRequest struct {
-	Broker     string `uri:"broker" binding:"required"`
+	Broker     string `uri:"account" binding:"required"`
 	TOTPSecret string `json:"totp_secret"`
 	UserKey    string `json:"user_key"`
 	PassKey    string `json:"pass_key"`
