@@ -6,7 +6,9 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
-	"github.com/sauravkuila/portfolio-worth/external"
+	"github.com/sauravkuila/portfolio-worth/pkg/db/broker"
+	"github.com/sauravkuila/portfolio-worth/pkg/db/creds"
+	"github.com/sauravkuila/portfolio-worth/pkg/db/mutualfund"
 )
 
 var (
@@ -15,20 +17,15 @@ var (
 
 type databaseStruct struct {
 	psql *sql.DB
+	broker.BrokerDatabaseInterface
+	mutualfund.MutualFundDatabaseInterface
+	creds.CredsDatabaseInterface
 }
 
 type DatabaseInterface interface {
-	GetSupportedBrokers() ([]string, error)
-	GetBrokerCred(broker string) (map[string]interface{}, error)
-	UpdateBrokerCred(data map[string]interface{}) error
-	GetAngelOneHoldings() ([]external.HoldingsInfo, float64, error)
-	GetIDirectHoldings() ([]external.HoldingsInfo, float64, error)
-	GetZerodhaHoldings() ([]external.HoldingsInfo, float64, error)
-	GetMfCentralHoldings() ([]external.MfHoldingsInfo, float64, error)
-	InsertAngelOneHoldings([]external.HoldingsInfo) error
-	InsertIDirectHoldings([]external.HoldingsInfo) error
-	InsertZerodhaHoldings([]external.HoldingsInfo) error
-	InsertMfCentralHoldings([]external.MfHoldingsInfo) error
+	broker.BrokerDatabaseInterface
+	mutualfund.MutualFundDatabaseInterface
+	creds.CredsDatabaseInterface
 }
 
 const (
@@ -55,7 +52,10 @@ func InitDb() (DatabaseInterface, error) {
 	}
 
 	dbObj = &databaseStruct{
-		psql: db,
+		db,
+		broker.NewBrokerDBInterface(db),
+		mutualfund.NewMutualfundInterfaceObj(db),
+		creds.NewCredsDbInterface(db),
 	}
 
 	return dbObj, nil

@@ -1,7 +1,6 @@
-package db
+package broker
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -10,127 +9,7 @@ import (
 	"github.com/sauravkuila/portfolio-worth/external"
 )
 
-func (obj *databaseStruct) GetSupportedBrokers() ([]string, error) {
-	query := "select broker_name from supported_broker;"
-	rows, err := obj.psql.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	brokers := make([]string, 0)
-	for rows.Next() {
-		var broker sql.NullString
-		err := rows.Scan(&broker)
-		if err != nil {
-			return nil, err
-		}
-		brokers = append(brokers, broker.String)
-	}
-	return brokers, nil
-}
-
-func (obj *databaseStruct) GetAngelOneHoldings() ([]external.HoldingsInfo, float64, error) {
-	var (
-		investedValue float64 = 0
-	)
-	query := "select symbol, isin, quantity, price, updated_on from angel_one;"
-	rows, err := obj.psql.Query(query)
-	if err != nil {
-		return nil, investedValue, err
-	}
-	holdings := make([]external.HoldingsInfo, 0)
-	for rows.Next() {
-		var (
-			symbol   sql.NullString
-			isin     sql.NullString
-			quantity sql.NullInt64
-			price    sql.NullFloat64
-			updated  sql.NullTime
-		)
-		err := rows.Scan(&symbol, &isin, &quantity, &price, &updated)
-		if err != nil {
-			return nil, investedValue, err
-		}
-		holdings = append(holdings, external.HoldingsInfo{
-			Symbol:    symbol.String,
-			Quantity:  quantity.Int64,
-			Isin:      isin.String,
-			AvgPrice:  price.Float64,
-			UpdatedOn: updated.Time,
-		})
-		investedValue += float64(quantity.Int64) * price.Float64
-	}
-	return holdings, investedValue, nil
-}
-
-func (obj *databaseStruct) GetIDirectHoldings() ([]external.HoldingsInfo, float64, error) {
-	var (
-		investedValue float64 = 0
-	)
-	query := "select symbol, isin, quantity, price, updated_on from idirect;"
-	rows, err := obj.psql.Query(query)
-	if err != nil {
-		return nil, investedValue, err
-	}
-	holdings := make([]external.HoldingsInfo, 0)
-	for rows.Next() {
-		var (
-			symbol   sql.NullString
-			isin     sql.NullString
-			quantity sql.NullInt64
-			price    sql.NullFloat64
-			updated  sql.NullTime
-		)
-		err := rows.Scan(&symbol, &isin, &quantity, &price, &updated)
-		if err != nil {
-			return nil, investedValue, err
-		}
-		holdings = append(holdings, external.HoldingsInfo{
-			Symbol:    symbol.String,
-			Quantity:  quantity.Int64,
-			Isin:      isin.String,
-			AvgPrice:  price.Float64,
-			UpdatedOn: updated.Time,
-		})
-		investedValue += float64(quantity.Int64) * price.Float64
-	}
-	return holdings, investedValue, nil
-}
-
-func (obj *databaseStruct) GetZerodhaHoldings() ([]external.HoldingsInfo, float64, error) {
-	var (
-		investedValue float64 = 0
-	)
-	query := "select symbol, isin, quantity, price, updated_on from zerodha;"
-	rows, err := obj.psql.Query(query)
-	if err != nil {
-		return nil, investedValue, err
-	}
-	holdings := make([]external.HoldingsInfo, 0)
-	for rows.Next() {
-		var (
-			symbol   sql.NullString
-			isin     sql.NullString
-			quantity sql.NullInt64
-			price    sql.NullFloat64
-			updated  sql.NullTime
-		)
-		err := rows.Scan(&symbol, &isin, &quantity, &price, &updated)
-		if err != nil {
-			return nil, investedValue, err
-		}
-		holdings = append(holdings, external.HoldingsInfo{
-			Symbol:    symbol.String,
-			Quantity:  quantity.Int64,
-			Isin:      isin.String,
-			AvgPrice:  price.Float64,
-			UpdatedOn: updated.Time,
-		})
-		investedValue += float64(quantity.Int64) * price.Float64
-	}
-	return holdings, investedValue, nil
-}
-
-func (obj *databaseStruct) InsertAngelOneHoldings(holdings []external.HoldingsInfo) error {
+func (obj *brokerDbSt) InsertAngelOneHoldings(holdings []external.HoldingsInfo) error {
 	//flush db
 	tx, err := obj.psql.Begin()
 	if err != nil {
@@ -144,7 +23,7 @@ func (obj *databaseStruct) InsertAngelOneHoldings(holdings []external.HoldingsIn
 		tx.Rollback()
 		return err
 	}
-	updateBrokerStatus := "update supported_broker set holdings_sync='t' where broker_name='angelone';"
+	updateBrokerStatus := "update supported_sources set holdings_sync='t' where source_name='angelone';"
 	res, err := tx.Exec(updateBrokerStatus)
 	if err != nil {
 		log.Println("Error in insertion", err.Error())
@@ -189,7 +68,7 @@ func (obj *databaseStruct) InsertAngelOneHoldings(holdings []external.HoldingsIn
 		return errors.New("not all holdings were inserted")
 	}
 
-	updateBrokerStatus = "update supported_broker set holdings_sync='t' where broker_name='angelone';"
+	updateBrokerStatus = "update supported_sources set holdings_sync='t' where source_name='angelone';"
 	res, err = tx.Exec(updateBrokerStatus)
 	if err != nil {
 		log.Println("Error in insertion", err.Error())
@@ -207,7 +86,7 @@ func (obj *databaseStruct) InsertAngelOneHoldings(holdings []external.HoldingsIn
 	return tx.Commit()
 }
 
-func (obj *databaseStruct) InsertIDirectHoldings(holdings []external.HoldingsInfo) error {
+func (obj *brokerDbSt) InsertIDirectHoldings(holdings []external.HoldingsInfo) error {
 	//flush db
 	tx, err := obj.psql.Begin()
 	if err != nil {
@@ -222,7 +101,7 @@ func (obj *databaseStruct) InsertIDirectHoldings(holdings []external.HoldingsInf
 		return err
 	}
 
-	updateBrokerStatus := "update supported_broker set holdings_sync='f' where broker_name='idirect';"
+	updateBrokerStatus := "update supported_sources set holdings_sync='f' where source_name='idirect';"
 	res, err := tx.Exec(updateBrokerStatus)
 	if err != nil {
 		log.Println("Error in insertion", err.Error())
@@ -267,7 +146,7 @@ func (obj *databaseStruct) InsertIDirectHoldings(holdings []external.HoldingsInf
 		return errors.New("not all holdings were inserted")
 	}
 
-	updateBrokerStatus = "update supported_broker set holdings_sync='t' where broker_name='idirect';"
+	updateBrokerStatus = "update supported_sources set holdings_sync='t' where source_name='idirect';"
 	res, err = tx.Exec(updateBrokerStatus)
 	if err != nil {
 		log.Println("Error in insertion", err.Error())
@@ -285,7 +164,7 @@ func (obj *databaseStruct) InsertIDirectHoldings(holdings []external.HoldingsInf
 	return tx.Commit()
 }
 
-func (obj *databaseStruct) InsertZerodhaHoldings(holdings []external.HoldingsInfo) error {
+func (obj *brokerDbSt) InsertZerodhaHoldings(holdings []external.HoldingsInfo) error {
 	//flush db
 	tx, err := obj.psql.Begin()
 	if err != nil {
@@ -300,7 +179,7 @@ func (obj *databaseStruct) InsertZerodhaHoldings(holdings []external.HoldingsInf
 		return err
 	}
 
-	updateBrokerStatus := "update supported_broker set holdings_sync='f' where broker_name='zerodha';"
+	updateBrokerStatus := "update supported_sources set holdings_sync='f' where source_name='zerodha';"
 	res, err := tx.Exec(updateBrokerStatus)
 	if err != nil {
 		log.Println("Error in insertion", err.Error())
@@ -343,7 +222,7 @@ func (obj *databaseStruct) InsertZerodhaHoldings(holdings []external.HoldingsInf
 		return errors.New("not all holdings were inserted")
 	}
 
-	updateBrokerStatus = "update supported_broker set holdings_sync='t' where broker_name='zerodha';"
+	updateBrokerStatus = "update supported_sources set holdings_sync='t' where source_name='zerodha';"
 	res, err = tx.Exec(updateBrokerStatus)
 	if err != nil {
 		log.Println("Error in insertion", err.Error())

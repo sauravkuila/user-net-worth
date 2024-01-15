@@ -1,13 +1,11 @@
-package db
+package creds
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
-	"strings"
 )
 
-func (obj *databaseStruct) GetBrokerCred(broker string) (map[string]interface{}, error) {
+func (obj *credDbSt) GetBrokerCred(broker string) (map[string]interface{}, error) {
 	var (
 		account    sql.NullString
 		totpSecret sql.NullString
@@ -43,40 +41,23 @@ func (obj *databaseStruct) GetBrokerCred(broker string) (map[string]interface{},
 	return data, nil
 }
 
-func (obj *databaseStruct) UpdateBrokerCred(data map[string]interface{}) error {
-	query := "update creds set "
-
-	i := 1
-	args := make([]interface{}, 0)
-	q := make([]string, 0)
-	var accountValue interface{}
-	for k, v := range data {
-		if k == "account" {
-			accountValue = v
-			continue
+func (obj *credDbSt) GetSupportedSources() (map[string][]string, error) {
+	query := "select source_name, source_type from supported_sources group by source_type,source_name;"
+	rows, err := obj.psql.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	resp := make(map[string][]string)
+	for rows.Next() {
+		var (
+			sourceName sql.NullString
+			sourceType sql.NullString
+		)
+		err := rows.Scan(&sourceName, &sourceType)
+		if err != nil {
+			return nil, err
 		}
-		q = append(q, fmt.Sprintf("%s=$%d", k, i))
-		args = append(args, v)
-		i += 1
+		resp[sourceType.String] = append(resp[sourceType.String], sourceName.String)
 	}
-
-	query += strings.Join(q, ",")
-	query += fmt.Sprintf(" where account = $%d;", i)
-	args = append(args, accountValue)
-
-	res, err := obj.psql.Exec(query, args...)
-	if err != nil {
-		log.Println("unable to update the creds. ", err.Error())
-		return err
-	}
-
-	affected, err := res.RowsAffected()
-	if err != nil {
-		log.Println("unable to fetch affected rows. ", err.Error())
-		return err
-	}
-	if affected != 1 {
-		return fmt.Errorf("not updated")
-	}
-	return nil
+	return resp, nil
 }

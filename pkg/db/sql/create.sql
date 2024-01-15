@@ -35,9 +35,11 @@ create table zerodha(
     updated_on timestamp default now()
 );
 
-create table supported_broker(
+create table supported_sources(
     id serial primary key,
-    broker_name text not null,
+    source_name text unique not null,
+    source_type text,
+    holdings_sync bool not null default FALSE,
     created_on timestamp default now(),
     updated_on timestamp default now()
 );
@@ -53,15 +55,6 @@ create table creds(
     created_on timestamp default now(),
     updated_on timestamp default now()
 )
-
-create table broker_sync(
-    id serial primary key,
-    broker_id int not null,
-    holdings_sync bool not null default FALSE,
-    created_on timestamp default now(),
-    updated_on timestamp default now(),
-    foreign key (broker_id) references supported_broker(id)
-);
 
 create table mf_central(
     id serial primary key,
@@ -89,7 +82,7 @@ $$ language 'plpgsql';
 CREATE TRIGGER sync_update_record
     BEFORE UPDATE
     ON
-        supported_broker
+        supported_sources
     FOR EACH ROW
 EXECUTE PROCEDURE update_record();
 
@@ -120,3 +113,10 @@ EXECUTE PROCEDURE update_record();
 -- WHERE event_object_table ='angel_one' 
 -- GROUP BY table_name , trigger_name 
 -- ORDER BY table_name ,trigger_name
+
+-- seed data
+insert into supported_sources(source_name,source_type,holdings_sync) values
+('zerodha','broker','f'),
+('angelone','broker','f'),
+('idirect','broker','f'),
+('mfcentral','mutualfund','f');
