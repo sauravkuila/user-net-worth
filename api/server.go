@@ -9,6 +9,7 @@ import (
 	"github.com/sauravkuila/portfolio-worth/external"
 	"github.com/sauravkuila/portfolio-worth/pkg/db"
 	"github.com/sauravkuila/portfolio-worth/pkg/service"
+	"github.com/sauravkuila/portfolio-worth/pkg/utils"
 )
 
 var (
@@ -22,6 +23,12 @@ func StartServer() error {
 	dbObj, err := db.InitDb()
 	if err != nil {
 		log.Fatal("unable to initialize db", err.Error())
+		return err
+	}
+
+	//populate symbol map
+	if err := utils.PopulateSymbolTokenMap(); err != nil {
+		log.Println("failed to parse symbol map", err.Error())
 		return err
 	}
 
@@ -43,8 +50,7 @@ func StartServer() error {
 }
 
 func ShutDownServer(ctx context.Context) error {
-	var err error
-	err = db.CloseDb()
+	err := db.CloseDb()
 	if err != nil {
 		return err
 	}

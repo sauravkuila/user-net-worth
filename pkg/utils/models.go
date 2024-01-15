@@ -1,5 +1,7 @@
 package utils
 
+import "time"
+
 type PaytmMoneyMfTickerResponse struct {
 	Meta struct {
 		Code           string `json:"code"`
@@ -198,5 +200,53 @@ type PaytmMoneyMfTickerResponse struct {
 				} `json:"categoryReturnsRange"`
 			} `json:"funds"`
 		} `json:"TOP_CATEGORY_FUNDS"`
+	} `json:"data"`
+}
+
+type SymbolInfo struct {
+	Token           string `json:"token"`
+	TradingSymbol   string `json:"symbol"`
+	Description     string `json:"name"`
+	LotSize         string `json:"lotsize"`
+	InstrumentType  string `json:"instrumenttype"`
+	TickSize        string `json:"tick_size"`
+	Strike          string `json:"strike"`
+	ExchangeSegment string `json:"exch_seg"`
+	Expiry          string `json:"expiry"`
+}
+
+type SymbolLtp struct {
+	Exchange      string
+	TradingSymbol string
+	Token         string
+	Ltp           float64
+	UpdatedOn     time.Time
+}
+
+type LtpTickerRequest struct {
+	Mode           string `json:"mode"`
+	ExchangeTokens struct {
+		Nse []string `json:"NSE"`
+		Bse []string `json:"BSE"`
+	} `json:"exchangeTokens"`
+}
+
+type LtpTickerResponse struct {
+	Status    bool   `json:"status"`
+	Message   string `json:"message"`
+	Errorcode string `json:"errorcode"`
+	Data      struct {
+		Fetched []struct {
+			Exchange      string  `json:"exchange"`
+			TradingSymbol string  `json:"tradingSymbol"`
+			Token         string  `json:"symbolToken"`
+			Ltp           float64 `json:"ltp"`
+		} `json:"fetched"`
+		Unfetched []struct {
+			Exchange  string `json:"exchange"`
+			Token     string `json:"symbolToken"`
+			Message   string `json:"message"`
+			ErrorCode string `json:"errorCode"`
+		} `json:"unfetched"`
 	} `json:"data"`
 }

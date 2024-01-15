@@ -21,5 +21,6 @@ type GetSpecificBrokerHoldingsResponse struct {
 type GetSpecificBrokerHoldings struct {
 	BrokerName    string      `json:"broker,omitempty"`
 	InvestedValue float64     `json:"investedValue,omitempty"`
+	CurrentValue  float64     `json:"currentValue,omitempty"`
 	Holdings      interface{} `json:"holdings,omitempty"`
 }

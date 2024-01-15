@@ -43,6 +43,9 @@ func LoginAndSyncAngelOne(userId string, pin string, totpkey string, appKey stri
 	// defer ABClient.Logout()
 
 	fmt.Println("User Session Tokens :- ", angelUserSession.UserSessionTokens)
+	fmt.Println("User Access Token :- ", angelUserSession.UserSessionTokens.AccessToken)
+	fmt.Println("User Refresh Token :- ", angelUserSession.UserSessionTokens.RefreshToken)
+	fmt.Println("User Feed Token :- ", angelUserSession.UserSessionTokens.FeedToken)
 
 	//Get User Profile
 	angelUserSession.UserProfile, err = abClient.GetUserProfile()
@@ -56,69 +59,6 @@ func LoginAndSyncAngelOne(userId string, pin string, totpkey string, appKey stri
 	fmt.Println("User Session Object :- ", angelUserSession)
 
 	return nil
-}
-
-func GetMarginAngel() {
-
-	// // Create New Angel Broking Client
-	// // ABClient := SmartApi.New("S452329", "Angel@123", "QOna9C82")
-	// ABClient := SmartApi.New("S452329", "7648", "QOna9C82")
-
-	// fmt.Println("Client :- ", ABClient)
-
-	// totp := generatePassCode("DFVGOUJ4T2MW356CCP5ZR7RAGQ")
-
-	// // totp = ""
-
-	// // User Login and Generate User Session
-	// session, err := ABClient.GenerateSession(totp)
-
-	// if err != nil {
-	// 	fmt.Println("error creating session. Error: ", err.Error())
-	// 	return
-	// }
-
-	// //Renew User Tokens using refresh token
-	// session.UserSessionTokens, err = ABClient.RenewAccessToken(session.RefreshToken)
-
-	// if err != nil {
-	// 	fmt.Println("error in renewing access token. Error: ", err.Error())
-	// 	return
-	// }
-
-	// // defer ABClient.Logout()
-
-	// fmt.Println("User Session Tokens :- ", session.UserSessionTokens)
-
-	// //Get User Profile
-	// session.UserProfile, err = ABClient.GetUserProfile()
-
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// 	return
-	// }
-
-	// fmt.Println("User Profile :- ", session.UserProfile)
-	// fmt.Println("User Session Object :- ", session)
-
-	// holdings, err := ABClient.GetHoldings()
-	// if err != nil {
-	// 	fmt.Println("error in fetching holdings", err.Error())
-	// }
-
-	// for _, holding := range holdings {
-	// 	fmt.Println("isin: ", holding.ISIN, " quantity: ", holding.Quantity, "", " average price: ", holding.AveragePrice, "holding: ", holding)
-	// }
-
-	// //Place Order
-	// order, err := ABClient.PlaceOrder(SmartApi.OrderParams{Variety: "NORMAL", TradingSymbol: "SBIN-EQ", SymbolToken: "3045", TransactionType: "BUY", Exchange: "NSE", OrderType: "LIMIT", ProductType: "INTRADAY", Duration: "DAY", Price: "19500", SquareOff: "0", StopLoss: "0", Quantity: "1"})
-
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// 	return
-	// }
-
-	// fmt.Println("Placed Order ID and Script :- ", order)
 }
 
 func GetHoldingsForAngel() ([]HoldingsInfo, error) {
@@ -180,4 +120,15 @@ func LogoutAngel() {
 	if abClient != nil {
 		abClient.Logout()
 	}
+}
+
+func GetAngelAccessToken() string {
+	return angelUserSession.UserSessionTokens.AccessToken
+}
+
+func GetAngelAppKey() string {
+	if abClient != nil {
+		return abClient.GetClientApiKey()
+	}
+	return ""
 }

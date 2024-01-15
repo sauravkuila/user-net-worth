@@ -11,7 +11,8 @@ type GetTotalWorthResponse struct {
 }
 
 type GetTotalWorth struct {
-	TotalInvested float64                            `json:"totalInvested,omitempty"`
-	Stocks        []broker.GetSpecificBrokerHoldings `json:"stocks,omitempty"`
-	MutualFunds   *mutualfund.GetMutualFundsHoldings `json:"mutualfunds,omitempty"`
+	TotalInvestedValue float64                            `json:"totalInvestedValue,omitempty"`
+	TotalCurrentValue  float64                            `json:"totalCurrentValue,omitempty"`
+	Stocks             []broker.GetSpecificBrokerHoldings `json:"stocks,omitempty"`
+	MutualFunds        *mutualfund.GetMutualFundsHoldings `json:"mutualfunds,omitempty"`
 }

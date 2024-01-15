@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sauravkuila/portfolio-worth/external"
+	"github.com/sauravkuila/portfolio-worth/pkg/utils"
 )
 
 func (obj *brokerSt) UpdateHoldingsFromBroker(c *gin.Context) {
@@ -89,6 +90,7 @@ func (obj *brokerSt) GetSpecificBrokerHoldings(c *gin.Context) {
 	var (
 		request  GetSpecificBrokerHoldingsRequest
 		response GetSpecificBrokerHoldingsResponse
+		currVal  float64
 	)
 	log.Println("inside broker package")
 	if err := c.BindUri(&request); err != nil {
@@ -105,10 +107,36 @@ func (obj *brokerSt) GetSpecificBrokerHoldings(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
+
+	//fetch tokens from holdings
+	var tokens []string
+	for _, holding := range holdings {
+		info, err := utils.GetSymbolInfoFromTradingSymbol(holding.Symbol)
+		if err != nil {
+			break
+		}
+		tokens = append(tokens, info.Token)
+	}
+	log.Println("tokens: ", tokens)
+
+	if len(tokens) == len(holdings) {
+		ltpMap, err := utils.GetSymbolLtpData(tokens)
+		if err == nil {
+			//analyze ltp and decide currval for holdings
+			for _, holding := range holdings {
+				info, _ := utils.GetSymbolInfoFromTradingSymbol(holding.Symbol)
+				log.Println(ltpMap[info.Token])
+				currVal += float64(holding.Quantity) * ltpMap[info.Token].Ltp
+				log.Println(currVal)
+			}
+		}
+	}
+
 	response.Data = &GetSpecificBrokerHoldings{
 		BrokerName:    request.Broker,
 		Holdings:      holdings,
 		InvestedValue: investedVal,
+		CurrentValue:  currVal,
 	}
 
 	// if request.Broker == "angelone" {

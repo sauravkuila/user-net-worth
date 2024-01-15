@@ -28,7 +28,8 @@ func (obj *serviceStruct) GetTotalWorth(c *gin.Context) {
 	}
 	for _, v := range brokerHoldings {
 		response.Data.Stocks = append(response.Data.Stocks, v)
-		response.Data.TotalInvested += v.InvestedValue
+		response.Data.TotalInvestedValue += v.InvestedValue
+		response.Data.TotalCurrentValue += v.CurrentValue
 	}
 
 	//mutual funds
@@ -40,7 +41,7 @@ func (obj *serviceStruct) GetTotalWorth(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, response)
 			return
 		}
-		response.Data.TotalInvested += mfInvestedVal
+		response.Data.TotalInvestedValue += mfInvestedVal
 		response.Data.MutualFunds = &mutualfund.GetMutualFundsHoldings{
 			InvestedValue: mfInvestedVal,
 			// Holdings:      mfholdings,
@@ -61,6 +62,7 @@ func (obj *serviceStruct) GetTotalWorth(c *gin.Context) {
 			nonZeroFolios = append(nonZeroFolios, holding)
 		}
 		response.Data.MutualFunds.Holdings = nonZeroFolios
+		response.Data.TotalCurrentValue += response.Data.MutualFunds.CurrentValue
 	}
 
 	c.JSON(http.StatusOK, response)

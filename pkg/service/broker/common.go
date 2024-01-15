@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/sauravkuila/portfolio-worth/external"
+	"github.com/sauravkuila/portfolio-worth/pkg/utils"
 )
 
 func (obj *brokerSt) getHoldingsByBroker(broker string) ([]external.HoldingsInfo, float64, error) {
@@ -52,9 +53,35 @@ func (obj *brokerSt) GetAllBrokerHoldings() (map[string]GetSpecificBrokerHolding
 		if holdings, investedVal, err := obj.getHoldingsByBroker(broker); err != nil {
 			return nil, err
 		} else {
+			//fetch tokens from holdings
+			var (
+				tokens  []string
+				currVal float64
+			)
+			for _, holding := range holdings {
+				info, err := utils.GetSymbolInfoFromTradingSymbol(holding.Symbol)
+				if err != nil {
+					break
+				}
+				tokens = append(tokens, info.Token)
+			}
+
+			if len(tokens) == len(holdings) {
+				ltpMap, err := utils.GetSymbolLtpData(tokens)
+				if err == nil {
+					//analyze ltp and decide currval for holdings
+					for _, holding := range holdings {
+						info, _ := utils.GetSymbolInfoFromTradingSymbol(holding.Symbol)
+						log.Println(ltpMap[info.Token])
+						currVal += float64(holding.Quantity) * ltpMap[info.Token].Ltp
+						log.Println(currVal)
+					}
+				}
+			}
 			response[broker] = GetSpecificBrokerHoldings{
 				BrokerName:    broker,
 				InvestedValue: investedVal,
+				CurrentValue:  currVal,
 				Holdings:      holdings,
 			}
 		}
