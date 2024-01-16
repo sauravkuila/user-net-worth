@@ -61,7 +61,7 @@ func (obj *brokerSt) UpdateHoldingsFromBroker(c *gin.Context) {
 		holdings, err := external.GetDematHoldingsForIDirect()
 		if err != nil {
 			log.Println("unable to fetch idirect holdings", err.Error())
-			response.Error = fmt.Sprintf("unable to fetch idirect holdings. Error: %s", err.Error())
+			response.Error = fmt.Sprintf("unable to fetch idirect holdings. Error: %s. If login is not done yet, use this url to login (%s)", err.Error(), external.GetIDirectLoginUrl())
 			c.JSON(http.StatusFailedDependency, response)
 			return
 		}

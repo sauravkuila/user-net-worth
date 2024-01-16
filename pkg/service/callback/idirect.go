@@ -1,10 +1,12 @@
 package callback
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sauravkuila/portfolio-worth/external"
 )
 
 func (obj *callbackSt) CallbackForIdirectApiSessionKey(c *gin.Context) {
@@ -19,6 +21,8 @@ func (obj *callbackSt) CallbackForIdirectApiSessionKey(c *gin.Context) {
 		})
 		return
 	}
+
+	external.SetIDirectSessionKeyFromCallback(fmt.Sprintf("%d", request.ApiSession))
 
 	c.JSON(http.StatusOK, &gin.H{
 		"data": request.ApiSession,

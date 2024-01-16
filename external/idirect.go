@@ -3,6 +3,7 @@ package external
 import (
 	"bytes"
 	"crypto/sha256"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,21 +14,26 @@ import (
 	"os/exec"
 	"strconv"
 	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
 const (
 	CallbackUrl         = "http://127.0.0.1:8080/callback/idirect"
-	AppKey              = ""
-	SecretKey           = ""
 	IdirectLoginBaseUrl = "https://api.icicidirect.com/apiuser/login?api_key=AppKey"
 )
-
-//https://api.icicidirect.com/apiuser/login?api_key=23vU6735q98H876r%2601Ia88V1%3di3Xx%2b8
 
 var (
 	iDirectSessionKey   = ""
 	iDirectSessionToken = ""
+	AppKey              = ""
+	SecretKey           = ""
 )
+
+func LoginAndSyncIDirect(appKey string, secretKey string) {
+	AppKey = appKey
+	SecretKey = secretKey
+}
 
 func GetHoldingsForIdirect() ([]HoldingsInfo, error) {
 	if err := generateSessionToken(); err != nil {
@@ -35,10 +41,10 @@ func GetHoldingsForIdirect() ([]HoldingsInfo, error) {
 		return nil, err
 	}
 	log.Println("session token: ", iDirectSessionToken)
-	if false {
-		appKey := url.QueryEscape(AppKey)
-		log.Println(appKey)
-	}
+	// if false {
+	// 	appKey := url.QueryEscape(AppKey)
+	// 	log.Println(appKey)
+	// }
 
 	// API endpoint
 	url := "https://api.icicidirect.com/breezeapi/api/v1/portfolioholdings"
@@ -185,12 +191,14 @@ func generateSessionToken() error {
 	return nil
 }
 
-// https://api.icicidirect.com/apiuser/tradelogin
 func GetDematHoldingsForIDirect() ([]HoldingsInfo, error) {
-	// if err := generateSessionToken(); err != nil {
-	// 	log.Println("error in creating session token")
-	// 	return nil, err
-	// }
+	if iDirectSessionToken == "" && iDirectSessionKey != "" {
+		if err := generateSessionToken(); err != nil {
+			return nil, err
+		}
+	} else if iDirectSessionKey == "" {
+		return nil, fmt.Errorf("no login done yet")
+	}
 
 	// Command to run the Python script with arguments
 	cmd := exec.Command("python", "../external/idirect_demat.py", AppKey, SecretKey, iDirectSessionToken)
@@ -206,94 +214,6 @@ func GetDematHoldingsForIDirect() ([]HoldingsInfo, error) {
 	// Print the script output
 	log.Println("Script Output:", string(responseData))
 
-	// log.Println("session token: ", iDirectSessionToken)
-	// if false {
-	// 	appKey := url.QueryEscape(AppKey)
-	// 	log.Println(appKey)
-	// }
-
-	// baseUrl := "api.icicidirect.com"
-
-	// // path := "https://api.icicidirect.com/breezeapi/api/v1/dematholdings"
-	// path := "/breezeapi/api/v1/dematholdings"
-
-	// // Payload
-	// payloadData := map[string]interface{}{}
-
-	// timestamp, checksum, payload := prepareRequest(payloadData)
-	// log.Println("payload", payload)
-	{
-
-		// headers := map[string]string{
-		// 	"x-checksum":     "token " + checksum,
-		// 	"x-timestamp":    timestamp,
-		// 	"x-appkey":       AppKey,
-		// 	"x-sessiontoken": iDirectSessionToken,
-		// 	"content-type":   "application/json",
-		// 	"host":           baseUrl,
-		// 	"content-length": fmt.Sprintf("%d", len(payload)),
-		// 	// "user-agent":     "testApp",
-		// 	// "accept":         "*/*",
-		// 	// "cache-control":  "no-cache",
-		// }
-
-		// // Make request using resty
-		// client := resty.New().
-		// 	SetRetryCount(2).
-		// 	SetRetryWaitTime(200 * time.Millisecond).
-		// 	SetRetryAfter(nil).
-		// 	SetTimeout(2000 * time.Millisecond)
-		// // client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-		// req := client.R().
-		// 	SetHeaders(headers).
-		// 	SetBody(`{"some":"data"}`)
-		// resp, err := req.Execute(http.MethodGet, "https://"+baseUrl+path)
-		// if err != nil {
-		// 	log.Println("Error making request:", err)
-		// 	return nil, err
-		// }
-
-		// // Access response data
-		// responseData := resp.Body()
-
-		// // Print response data
-		// log.Println("Response Body:", string(responseData))
-	}
-
-	{
-		// url := "https://" + baseUrl + path
-		// method := "GET"
-
-		// // payload = strings.NewReader(`{}`)
-
-		// client := &http.Client{}
-		// req, err := http.NewRequest(method, url, strings.NewReader(`{}`))
-
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	return nil, err
-		// }
-		// req.Header.Add("X-Checksum", "token "+checksum)
-		// req.Header.Add("X-Timestamp", timestamp)
-		// req.Header.Add("X-AppKey", AppKey)
-		// req.Header.Add("X-SessionToken", iDirectSessionToken)
-		// req.Header.Add("Content-Type", "application/json")
-
-		// res, err := client.Do(req)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	return nil, err
-		// }
-		// defer res.Body.Close()
-
-		// body, err := ioutil.ReadAll(res.Body)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	return nil, err
-		// }
-		// fmt.Println(string(body))
-		// responseData := body
-	}
 	var response IDirectDematHoldingsResponse
 	err = json.Unmarshal(responseData, &response)
 	if err != nil {
@@ -324,30 +244,127 @@ func GetDematHoldingsForIDirect() ([]HoldingsInfo, error) {
 	return holdings, nil
 }
 
-func prepareRequest(body map[string]interface{}) (string, string, string) {
+func GetDematHoldingsForIDirect_Retired() ([]HoldingsInfo, error) {
+	if err := generateSessionToken(); err != nil {
+		log.Println("error in creating session token")
+		return nil, err
+	}
+
+	log.Println("session token: ", iDirectSessionToken)
+
+	path := "https://api.icicidirect.com/breezeapi/api/v1/dematholdings"
+
+	// Payload
+	payloadData := map[string]interface{}{}
+
+	timestamp, checksum, payload := prepareRequest(payloadData)
+	if payload == nil {
+		log.Println("failed to prepare request")
+		return nil, fmt.Errorf("failed to prepare payload")
+	}
+	log.Println("payload", payload)
+
+	headers := map[string]string{
+		"X-Checksum":     "token " + checksum,
+		"X-Timestamp":    timestamp,
+		"X-AppKey":       AppKey,
+		"X-SessionToken": iDirectSessionToken,
+		"Content-Type":   "application/json",
+		"host":           "api.icicidirect.com",
+	}
+
+	// Make request using resty
+	client := resty.New().
+		SetRetryCount(2).
+		SetRetryWaitTime(200 * time.Millisecond).
+		SetRetryAfter(nil).
+		SetTimeout(2000 * time.Millisecond).
+		SetDebug(true).
+		SetAllowGetMethodPayload(true).
+		SetContentLength(true).
+		SetTLSClientConfig(&tls.Config{RootCAs: nil})
+	// client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	req := client.R().
+		SetHeaders(headers).
+		SetBody(payload)
+	resp, err := req.Execute(http.MethodGet, path)
+	if err != nil {
+		log.Println("Error making request:", err)
+		return nil, err
+	}
+
+	// Access response data
+	responseData := resp.Body()
+
+	// Print response data
+	log.Println("Response Body:", string(responseData))
+	log.Println("Response Status:", resp.StatusCode())
+
+	var response IDirectDematHoldingsResponse
+	err = json.Unmarshal(responseData, &response)
+	if err != nil {
+		log.Println("Error reading response body:", err)
+		return nil, err
+	}
+
+	if response.Status != 200 {
+		log.Println("failed to fetch holdings")
+		return nil, errors.New("vendor api returned non 200 status")
+	}
+
+	var holdings []HoldingsInfo
+	for _, stock := range response.Success {
+		qty, err := strconv.ParseInt(stock.Quantity, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		holdings = append(holdings, HoldingsInfo{
+			Symbol:    stock.StockCode,
+			Quantity:  qty,
+			Isin:      stock.StockISIN,
+			AvgPrice:  0.0,
+			UpdatedOn: time.Now(),
+		})
+	}
+
+	return holdings, nil
+}
+
+func prepareRequest(body map[string]interface{}) (string, string, []byte) {
 	// App related Secret Key
-	// secretKey := "your_SECRET_goes_here"
 	secretKey := SecretKey
 
 	// 'body' is the request-body of your current request
-	// body := map[string]interface{}{"key": "value"} // Replace this with your actual request body
 	payload, err := json.Marshal(body)
 	if err != nil {
 		log.Println("Error marshaling JSON:", err)
-		return "", "", ""
+		return "", "", nil
 	}
 	log.Println("payload: ", string(payload))
 
 	// Time_stamp & checksum generation for request-headers
 	timeStamp := time.Now().UTC().Format("2006-01-02T15:04:05") + ".000Z"
 	// dataToHash := timeStamp + string(payload) + secretKey
-	dataToHash := timeStamp + "{}" + secretKey
+	dataToHash := timeStamp + string(payload) + secretKey
 	checksum := sha256.Sum256([]byte(dataToHash))
 	checksumHex := fmt.Sprintf("%x", checksum)
 
 	log.Println("Time Stamp:", timeStamp)
 	log.Println("Checksum:", string(checksumHex))
-	return timeStamp, string(checksumHex), string(payload)
+	return timeStamp, string(checksumHex), payload
+}
+
+func SetIDirectSessionKeyFromCallback(key string) {
+	log.Println("sessionkey: ", iDirectSessionKey)
+	iDirectSessionKey = key
+	log.Println("sessionkey: ", iDirectSessionKey)
+	generateSessionToken()
+}
+
+func GetIDirectLoginUrl() string {
+	appKey := url.QueryEscape(AppKey)
+	log.Println(appKey)
+	return "https://api.icicidirect.com/apiuser/login?api_key=" + appKey
 }
 
 //for checksum generation

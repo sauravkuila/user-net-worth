@@ -41,6 +41,9 @@ func (obj *brokerSt) initBrokerLogins() {
 	if creds, err := obj.dbObj.GetBrokerCred("zerodha"); err == nil {
 		external.LoginAndSyncZerodha(creds["user_key"].(string), creds["pass_key"].(string), creds["totp_secret"].(string))
 	}
+	if creds, err := obj.dbObj.GetBrokerCred("idirect"); err == nil {
+		external.LoginAndSyncIDirect(creds["app_api_key"].(string), creds["secret_key"].(string))
+	}
 }
 
 // alphavantage api_key
