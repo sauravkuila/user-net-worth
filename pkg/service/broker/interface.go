@@ -4,23 +4,30 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sauravkuila/portfolio-worth/external"
 	"github.com/sauravkuila/portfolio-worth/pkg/db"
+	"github.com/sauravkuila/portfolio-worth/pkg/quote"
 )
 
 type brokerSt struct {
-	dbObj db.DatabaseInterface
+	dbObj    db.DatabaseInterface
+	quoteObj quote.QuoteInterface
 }
 
 type BrokerInterface interface {
 	UpdateHoldingsFromBroker(c *gin.Context)
 	GetSpecificBrokerHoldings(c *gin.Context)
 	//returns all holdings across brokers
-	//output: holdings
+	//	output:
+	//		map[broker]HoldingInfo objec
+	//		error
 	GetAllBrokerHoldings() (map[string]GetSpecificBrokerHoldings, error)
+	//returns all token across all holdings including all brokers
+	GetHoldingTokenAcrossAllBrokers() ([]string, error)
 }
 
-func NewBrokerInterfaceObj(db db.DatabaseInterface) BrokerInterface {
+func NewBrokerInterfaceObj(db db.DatabaseInterface, quoteItf quote.QuoteInterface) BrokerInterface {
 	brokerObj := &brokerSt{
-		dbObj: db,
+		dbObj:    db,
+		quoteObj: quoteItf,
 	}
 	go brokerObj.initBrokerLogins()
 	return brokerObj

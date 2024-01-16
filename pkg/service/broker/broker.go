@@ -108,29 +108,44 @@ func (obj *brokerSt) GetSpecificBrokerHoldings(c *gin.Context) {
 		return
 	}
 
-	//fetch tokens from holdings
-	var tokens []string
-	for _, holding := range holdings {
+	for i, holding := range holdings {
 		info, err := utils.GetSymbolInfoFromTradingSymbol(holding.Symbol)
 		if err != nil {
+			currVal = 0
 			break
 		}
-		tokens = append(tokens, info.Token)
-	}
-	log.Println("tokens: ", tokens)
-
-	if len(tokens) == len(holdings) {
-		ltpMap, err := utils.GetSymbolLtpData(tokens)
-		if err == nil {
-			//analyze ltp and decide currval for holdings
-			for _, holding := range holdings {
-				info, _ := utils.GetSymbolInfoFromTradingSymbol(holding.Symbol)
-				log.Println(ltpMap[info.Token])
-				currVal += float64(holding.Quantity) * ltpMap[info.Token].Ltp
-				log.Println(currVal)
-			}
+		if d, err := obj.quoteObj.GetSymbolLtp(info.Token); err != nil {
+			currVal = 0
+			break
+		} else {
+			currVal += d.Ltp * float64(holding.Quantity)
+			holdings[i].Ltp = d.Ltp
 		}
 	}
+
+	// //fetch tokens from holdings
+	// var tokens []string
+	// for _, holding := range holdings {
+	// 	info, err := utils.GetSymbolInfoFromTradingSymbol(holding.Symbol)
+	// 	if err != nil {
+	// 		break
+	// 	}
+	// 	tokens = append(tokens, info.Token)
+	// }
+	// log.Println("tokens: ", tokens)
+
+	// if len(tokens) == len(holdings) {
+	// 	ltpMap, err := utils.GetSymbolLtpData(tokens)
+	// 	if err == nil {
+	// 		//analyze ltp and decide currval for holdings
+	// 		for _, holding := range holdings {
+	// 			info, _ := utils.GetSymbolInfoFromTradingSymbol(holding.Symbol)
+	// 			log.Println(ltpMap[info.Token])
+	// 			currVal += float64(holding.Quantity) * ltpMap[info.Token].Ltp
+	// 			log.Println(currVal)
+	// 		}
+	// 	}
+	// }
 
 	response.Data = &GetSpecificBrokerHoldings{
 		BrokerName:    request.Broker,
@@ -138,48 +153,6 @@ func (obj *brokerSt) GetSpecificBrokerHoldings(c *gin.Context) {
 		InvestedValue: investedVal,
 		CurrentValue:  currVal,
 	}
-
-	// if request.Broker == "angelone" {
-	// 	holdings, investedVal, err := obj.dbObj.GetAngelOneHoldings()
-	// 	if err != nil {
-	// 		log.Println("failed to fetch holdings from db", err.Error())
-	// 		response.Error = err.Error()
-	// 		c.JSON(http.StatusInternalServerError, response)
-	// 		return
-	// 	}
-	// 	response.Data = &GetSpecificBrokerHoldings{
-	// 		InvestedValue: investedVal,
-	// 		Holdings:      holdings,
-	// 	}
-	// } else if request.Broker == "zerodha" {
-	// 	holdings, investedVal, err := obj.dbObj.GetZerodhaHoldings()
-	// 	if err != nil {
-	// 		log.Println("failed to fetch holdings from db", err.Error())
-	// 		response.Error = err.Error()
-	// 		c.JSON(http.StatusInternalServerError, response)
-	// 		return
-	// 	}
-	// 	response.Data = &GetSpecificBrokerHoldings{
-	// 		InvestedValue: investedVal,
-	// 		Holdings:      holdings,
-	// 	}
-	// } else if request.Broker == "idirect" {
-	// 	holdings, investedVal, err := obj.dbObj.GetIDirectHoldings()
-	// 	if err != nil {
-	// 		log.Println("failed to fetch holdings from db", err.Error())
-	// 		response.Error = err.Error()
-	// 		c.JSON(http.StatusInternalServerError, response)
-	// 		return
-	// 	}
-	// 	response.Data = &GetSpecificBrokerHoldings{
-	// 		InvestedValue: investedVal,
-	// 		Holdings:      holdings,
-	// 	}
-	// } else {
-	// 	response.Error = "invalid broker received"
-	// 	c.JSON(http.StatusBadRequest, response)
-	// 	return
-	// }
 
 	c.JSON(http.StatusOK, response)
 }

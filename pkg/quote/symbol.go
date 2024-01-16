@@ -29,7 +29,6 @@ func (obj *quoteSt) RemoveSymbolToken(token string) error {
 }
 
 func (obj *quoteSt) GetSymbolLtp(token string) (*utils.SymbolLtp, error) {
-	// token = strings.Split(token, "-")[0]
 	data, found := obj.symbolQuoteMap[token]
 	if !found {
 		return nil, fmt.Errorf("token not subscribed")

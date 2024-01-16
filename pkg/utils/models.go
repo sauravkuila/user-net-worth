@@ -215,6 +215,13 @@ type SymbolInfo struct {
 	Expiry          string `json:"expiry"`
 }
 
+type MutualFundNav struct {
+	Nav        float64
+	Isin       string
+	SchemeName string
+	UpdatedOn  time.Time
+}
+
 type SymbolLtp struct {
 	Exchange      string
 	TradingSymbol string

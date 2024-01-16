@@ -8,12 +8,15 @@ import (
 
 	"github.com/sauravkuila/portfolio-worth/external"
 	"github.com/sauravkuila/portfolio-worth/pkg/db"
+	"github.com/sauravkuila/portfolio-worth/pkg/quote"
 	"github.com/sauravkuila/portfolio-worth/pkg/service"
 	"github.com/sauravkuila/portfolio-worth/pkg/utils"
 )
 
 var (
-	serverObj *http.Server = nil
+	serverObj  *http.Server = nil
+	serviceObj service.ServiceInterface
+	quoteItf   quote.QuoteInterface
 )
 
 func StartServer() error {
@@ -32,13 +35,29 @@ func StartServer() error {
 		return err
 	}
 
+	//init quote package
+	quoteItf = quote.NewQuoteInterface(dbObj)
+
 	//set up service interface
-	serviceObj := service.InitService(dbObj)
+	serviceObj = service.InitService(dbObj, quoteItf)
 
 	serverObj = &http.Server{
 		Addr:    ":8080",
 		Handler: getRouter(serviceObj),
 	}
+
+	//start quotes
+	tokens, err := serviceObj.GetBrokerObject().GetHoldingTokenAcrossAllBrokers()
+	if err != nil {
+		log.Println("unable to start ltp sync due to failed token list fetch")
+		return err
+	}
+	isins, err := serviceObj.GetMutualFundObject().GetIsinOfFundHoldings()
+	if err != nil {
+		log.Println("unable to start ltp sync due to failed isin list fetch")
+		return err
+	}
+	quoteItf.StartLtpNavRoutine(tokens, isins)
 
 	go func() {
 		// service connections
@@ -55,5 +74,6 @@ func ShutDownServer(ctx context.Context) error {
 		return err
 	}
 	external.LogoutAngel()
+	quoteItf.StopLtpNavRoutine()
 	return serverObj.Shutdown(ctx)
 }

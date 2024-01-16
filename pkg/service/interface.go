@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sauravkuila/portfolio-worth/pkg/db"
+	"github.com/sauravkuila/portfolio-worth/pkg/quote"
 	"github.com/sauravkuila/portfolio-worth/pkg/service/broker"
 	"github.com/sauravkuila/portfolio-worth/pkg/service/callback"
 	"github.com/sauravkuila/portfolio-worth/pkg/service/creds"
@@ -11,6 +12,7 @@ import (
 
 type serviceStruct struct {
 	dbObj       db.DatabaseInterface
+	quoteObj    quote.QuoteInterface
 	brokerObj   broker.BrokerInterface
 	mfObj       mutualfund.MutualFundInterface
 	credObj     creds.CredsInterface
@@ -25,11 +27,12 @@ type ServiceInterface interface {
 	GetTotalWorth(c *gin.Context)
 }
 
-func InitService(dbItf db.DatabaseInterface) ServiceInterface {
+func InitService(dbItf db.DatabaseInterface, quoteItf quote.QuoteInterface) ServiceInterface {
 	serviceObj := serviceStruct{
 		dbObj:       dbItf,
-		brokerObj:   broker.NewBrokerInterfaceObj(dbItf),
-		mfObj:       mutualfund.NewMutualfundInterfaceObj(dbItf),
+		quoteObj:    quoteItf,
+		brokerObj:   broker.NewBrokerInterfaceObj(dbItf, quoteItf),
+		mfObj:       mutualfund.NewMutualfundInterfaceObj(dbItf, quoteItf),
 		credObj:     creds.NewCredsInterfaceObject(dbItf),
 		callbackObj: callback.NewCallbackInterface(dbItf),
 	}

@@ -7,6 +7,7 @@ type HoldingsInfo struct {
 	Quantity  int64
 	Isin      string
 	AvgPrice  float64
+	Ltp       float64
 	UpdatedOn time.Time
 }
 
@@ -17,6 +18,7 @@ type MfHoldingsInfo struct {
 	AvgPrice    float64
 	InvestedVal float64
 	CurrentVal  float64
+	Nav         float64
 	Folio       string
 	UpdatedOn   time.Time
 }

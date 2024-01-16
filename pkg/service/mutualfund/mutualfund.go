@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sauravkuila/portfolio-worth/external"
-	"github.com/sauravkuila/portfolio-worth/pkg/utils"
 )
 
 func (obj *mutualfundSt) GetMutualFundsHoldings(c *gin.Context) {
@@ -15,8 +14,7 @@ func (obj *mutualfundSt) GetMutualFundsHoldings(c *gin.Context) {
 		response GetMutualFundsHoldingsResponse
 	)
 
-	//fetch data from db
-	holdings, investedVal, err := obj.dbObj.GetMfCentralHoldings()
+	holdings, investedVal, currentVal, err := obj.GetMutualFundHoldingData()
 	if err != nil {
 		log.Println("failed to fetch holdings from db", err.Error())
 		response.Error = err.Error()
@@ -25,16 +23,8 @@ func (obj *mutualfundSt) GetMutualFundsHoldings(c *gin.Context) {
 	}
 	response.Data = &GetMutualFundsHoldings{
 		InvestedValue: investedVal,
+		CurrentValue:  currentVal,
 		Holdings:      holdings,
-	}
-
-	for _, holding := range holdings {
-		currVal := holding.CurrentVal
-		nav, err := utils.GetNavValueFromIsin(holding.Isin)
-		if err == nil {
-			currVal = nav * holding.Quantity
-		}
-		response.Data.CurrentValue += currVal
 	}
 
 	c.JSON(http.StatusOK, response)
