@@ -1,0 +1,8 @@
+version: 1.0
+
+db:
+  host: $PSQL_HOST
+  port: $PSQL_PORT
+  user: $PSQL_USER
+  password: $PSQL_PASS
+  dbname: $PSQL_DB

@@ -11,10 +11,18 @@ import (
 	"time"
 
 	"github.com/sauravkuila/portfolio-worth/api"
+	"github.com/sauravkuila/portfolio-worth/pkg/config"
 )
 
 func main() {
 	log.Println("Portfolio Valuation Project")
+	//initialize config
+	filename := "local"
+	if _, ok := os.LookupEnv("HOST"); ok {
+		filename = "server"
+	}
+	config.Load(filename)
+
 	if err := api.StartServer(); err != nil {
 		log.Fatal("failed to start portfolio-worth server", err.Error())
 	}
