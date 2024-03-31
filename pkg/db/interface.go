@@ -6,6 +6,7 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
+	"github.com/sauravkuila/portfolio-worth/pkg/config"
 	"github.com/sauravkuila/portfolio-worth/pkg/db/broker"
 	"github.com/sauravkuila/portfolio-worth/pkg/db/creds"
 	"github.com/sauravkuila/portfolio-worth/pkg/db/mutualfund"
@@ -28,16 +29,18 @@ type DatabaseInterface interface {
 	creds.CredsDatabaseInterface
 }
 
-const (
-	host     = "127.0.0.1"
-	port     = 5432
-	user     = "postgres"
-	password = "postgres"
-	dbname   = "portfolio"
-)
+// const (
+// 	host     = "psql"
+// 	port     = 5432
+// 	user     = "postgres"
+// 	password = "postgres"
+// 	// dbname   = "portfolio"
+// 	dbname = "local"
+// )
 
 func InitDb() (DatabaseInterface, error) {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	cfg := config.GetConfig()
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable", cfg.GetString("db.host"), cfg.GetInt("db.port"), cfg.GetString("db.user"), cfg.GetString("db.password"), cfg.GetString("db.dbname"))
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {

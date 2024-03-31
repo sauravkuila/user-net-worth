@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sauravkuila/portfolio-worth/pkg/db"
 	"github.com/sauravkuila/portfolio-worth/pkg/service"
 )
 
@@ -11,6 +12,10 @@ func getRouter(serviceObj service.ServiceInterface) *gin.Engine {
 	router := gin.Default()
 	router.GET("/health", func(c *gin.Context) {
 		c.String(http.StatusOK, "I am Healthy")
+	})
+	router.GET("/checkDb", func(c *gin.Context) {
+		_, err := db.InitDb()
+		c.JSON(http.StatusOK, gin.H{"error": err})
 	})
 	//sources for the data
 	sourceGroup := router.Group("/sources")
