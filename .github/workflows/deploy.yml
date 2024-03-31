@@ -15,6 +15,9 @@ jobs:
     
     steps:
 
+    - name: checkout go into go module directory
+      uses: actions/checkout@v3
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
