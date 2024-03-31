@@ -10,7 +10,7 @@ on:
 jobs:
 
   build:
-    name: Build
+    name: Build and Deploy
     runs-on: ubuntu-latest
     
     steps:
