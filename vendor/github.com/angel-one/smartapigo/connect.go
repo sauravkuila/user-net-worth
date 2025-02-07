@@ -25,18 +25,18 @@ const (
 )
 
 // New creates a new Smart API client.
-func New(clientCode string,password string,apiKey string) *Client {
+func New(clientCode string, password string, apiKey string) *Client {
 	client := &Client{
 		clientCode: clientCode,
-		password: password,
-		apiKey: apiKey,
-		baseURI: baseURI,
+		password:   password,
+		apiKey:     apiKey,
+		baseURI:    baseURI,
 	}
 
 	// Create a default http handler with default timeout.
 	client.SetHTTPClient(&http.Client{
-		Timeout: requestTimeout,
-		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify : true}},
+		Timeout:   requestTimeout,
+		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}},
 	})
 
 	return client
@@ -80,7 +80,7 @@ func (c *Client) doEnvelope(method, uri string, params map[string]interface{}, h
 		headers = map[string][]string{}
 	}
 
-	localIp,publicIp,mac,err := getIpAndMac()
+	localIp, publicIp, mac, err := getIpAndMac()
 
 	if err != nil {
 		return err
@@ -94,14 +94,14 @@ func (c *Client) doEnvelope(method, uri string, params map[string]interface{}, h
 	headers.Add("Accept", "application/json")
 	headers.Add("X-UserType", "USER")
 	headers.Add("X-SourceID", "WEB")
-	headers.Add("X-PrivateKey",c.apiKey)
-	if authorization != nil && authorization[0]{
-		headers.Add("Authorization","Bearer "+c.accessToken)
+	headers.Add("X-PrivateKey", c.apiKey)
+	if authorization != nil && authorization[0] {
+		headers.Add("Authorization", "Bearer "+c.accessToken)
 	}
 
 	return c.httpClient.DoEnvelope(method, c.baseURI+uri, params, headers, v)
 }
 
-
-
-
+func (c *Client) GetClientApiKey() string {
+	return c.apiKey
+}
