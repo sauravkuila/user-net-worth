@@ -26,9 +26,9 @@ var (
 func GetMutualFundHoldingsFromMfCentral() ([]MfHoldingsInfo, error) {
 
 	mfCentralEncToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmYTllZGQ4ZC03OTFmLTQxZGMtYTM1MC0wMjlkOTg2OGNkOWMiLCJpYXQiOjE3MDUxODIwMTEsImp0aSI6IjJmZTNjODczLTMwYmItNDcxNi04NzcwLTIyNjlhNTQyYWJkNiJ9.c9lO58Mv1wSnIx-hfDV657B95IyVo0ZDEoKg-NZK69I"
-	mfCentralPan = "DOHPK9713J"
+	mfCentralPan = "ABCDE1234F"
 	mfCentralPekrn = ""
-	mfCentralMobile = "+919620853569"
+	mfCentralMobile = "+919999999999"
 	mfCentralEmail = ""
 
 	request := MFCentralPortfolioRequest{
